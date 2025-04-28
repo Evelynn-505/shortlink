@@ -45,4 +45,7 @@ public class UserDO{
      * 注销时间戳
      */
     private Long deletionTime;
+
+    private Integer delFlag;
+
 }
