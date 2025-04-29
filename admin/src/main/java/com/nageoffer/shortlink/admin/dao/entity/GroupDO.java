@@ -1,6 +1,7 @@
 package com.nageoffer.shortlink.admin.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.nageoffer.shortlink.admin.common.database.BaseDO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupDO {
+public class GroupDO extends BaseDO {
 
     /**
      * id
