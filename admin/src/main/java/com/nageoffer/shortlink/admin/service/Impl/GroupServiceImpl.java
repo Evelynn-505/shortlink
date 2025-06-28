@@ -33,14 +33,19 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
 
     @Override
     public void saveGroup(String groupName) {
+        this.saveGroup(UserContext.getUsername(), groupName);
+    }
+
+    @Override
+    public void saveGroup(String username, String groupName) {
         String gid;
         do {
             gid = RandomGenerator.generateRandom();
-        } while (!hasGid(gid));
+        } while (!hasGid(username, gid));
         GroupDO groupDO = GroupDO.builder()
                 .gid(gid)
                 .sortOrder(0)
-                .username(UserContext.getUsername())
+                .username(username)
                 .name(groupName)
                 .build();
         baseMapper.insert(groupDO);
@@ -64,6 +69,19 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         });
         return shortLinkGroupRespDTOList;
     }
+
+    //更好的写法
+    /*public List<GroupRespDTO> listGroup() {
+        LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .orderByAsc(GroupDO::getSort)
+                .orderByAsc(GroupDO::getUpdateTime);
+        List<GroupDO> groups = baseMapper.selectList(queryWrapper);
+        List<LinkCountRespDTO> gids = shortLInkRemoteService.count(groups.stream().map(GroupDO::getGid).toList()).getData();
+        List<GroupRespDTO> results = BeanUtil.copyToList(groups, GroupRespDTO.class);
+        Map<String, Integer> counts = gids.stream().collect(Collectors.toMap(LinkCountRespDTO::getGid, LinkCountRespDTO::getCount));
+        return results.stream().peek(result -> result.setCount(counts.get(result.getGid()))).toList();
+    }*/
 
     @Override
     public void updateGroup(ShortLinkGroupUpdateReqDTO requestParam) {
@@ -100,10 +118,10 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         });
     }
 
-    private boolean hasGid(String gid) {
+    private boolean hasGid(String username, String gid) {
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getGid, gid)
-                .eq(GroupDO::getUsername, UserContext.getUsername());
+                .eq(GroupDO::getUsername, Optional.ofNullable(username).orElse(UserContext.getUsername()));
         GroupDO hasGroupFlag = baseMapper.selectOne(queryWrapper);
         return hasGroupFlag == null;
     }
