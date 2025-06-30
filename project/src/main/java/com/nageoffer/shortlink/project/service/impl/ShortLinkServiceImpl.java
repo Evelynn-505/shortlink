@@ -10,8 +10,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nageoffer.shortlink.admin.common.convention.exception.ClientException;
+import com.nageoffer.shortlink.admin.common.convention.exception.ServiceException;
 import com.nageoffer.shortlink.project.common.enums.ValidateTypeEnum;
-import com.nageoffer.shortlink.project.controller.convention.exception.ServiceException;
 import com.nageoffer.shortlink.project.dao.entity.ShortLinkDO;
 import com.nageoffer.shortlink.project.dao.entity.ShortLinkGotoDO;
 import com.nageoffer.shortlink.project.dao.mapper.ShortLinkGotoMapper;
@@ -19,8 +19,8 @@ import com.nageoffer.shortlink.project.dao.mapper.ShortLinkMapper;
 import com.nageoffer.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.nageoffer.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.nageoffer.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
-import com.nageoffer.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.nageoffer.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import com.nageoffer.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.nageoffer.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.nageoffer.shortlink.project.service.ShortLinkService;
 import com.nageoffer.shortlink.project.toolkit.HashUtil;
@@ -189,10 +189,12 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         }
         boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
         if (!contains) {
+            response.sendRedirect("/page/notfound");
             return;
         }
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
+            response.sendRedirect("/page/notfound");
             return;
         }
         RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
@@ -208,6 +210,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ShortLinkGotoDO shortLinkGotoDO = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
             if (shortLinkGotoDO == null) {
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                response.sendRedirect("/page/notfound");
                 return;
             }
             LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
@@ -220,6 +223,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 //如果短链接过期，当作不存在处理
                 if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date())) {
                     stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                    response.sendRedirect("/page/notfound");
                     return;
                 }
                 //将查到的短链接放入redis

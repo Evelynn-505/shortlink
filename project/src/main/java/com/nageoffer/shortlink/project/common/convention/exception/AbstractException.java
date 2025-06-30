@@ -1,6 +1,6 @@
-package com.nageoffer.shortlink.project.controller.convention.exception;
+package com.nageoffer.shortlink.project.common.convention.exception;
 
-import com.nageoffer.shortlink.admin.common.convention.errorcode.IErrorCode;
+import com.nageoffer.shortlink.project.common.convention.errorcode.IErrorCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
