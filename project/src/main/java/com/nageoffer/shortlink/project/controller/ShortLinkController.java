@@ -13,9 +13,9 @@ import com.nageoffer.shortlink.project.service.ShortLinkService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ public class ShortLinkController {
     private ShortLinkService shortLinkService;
 
     @GetMapping("/{short-uri}")
-    public void   restoreUrl(@PathVariable("short-uri") String shortUri, HttpServletRequest request, HttpServletResponse response) {
+    public void   restoreUrl(@PathVariable("short-uri") String shortUri, HttpServletRequest request, HttpServletResponse response) throws IOException {
         shortLinkService.restoreUrl(shortUri, request, response);
     }
 
