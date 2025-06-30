@@ -1,8 +1,8 @@
 package com.nageoffer.shortlink.project.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.nageoffer.shortlink.project.controller.convention.result.Result;
-import com.nageoffer.shortlink.project.controller.convention.result.Results;
+import com.nageoffer.shortlink.project.common.convention.result.Result;
+import com.nageoffer.shortlink.project.common.convention.result.Results;
 import com.nageoffer.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.nageoffer.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.nageoffer.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -27,6 +27,9 @@ public class ShortLinkController {
 
     private ShortLinkService shortLinkService;
 
+    /**
+     * 短链接跳转原始链接
+     */
     @GetMapping("/{short-uri}")
     public void   restoreUrl(@PathVariable("short-uri") String shortUri, HttpServletRequest request, HttpServletResponse response) throws IOException {
         shortLinkService.restoreUrl(shortUri, request, response);
