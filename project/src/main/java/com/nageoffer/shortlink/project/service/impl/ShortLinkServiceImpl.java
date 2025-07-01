@@ -226,21 +226,19 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getDelFlag, 0)
                     .orderByDesc(ShortLinkDO::getCreateTime);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
-            if (shortLinkDO != null) {
+            if (shortLinkDO == null || shortLinkDO.getValidDate().before(new Date())) {
                 //如果短链接过期，当作不存在处理
-                if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date())) {
-                    stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
-                    response.sendRedirect("/page/notfound");
-                    return;
-                }
-                //将查到的短链接放入redis
-                stringRedisTemplate.opsForValue().set(
-                        String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
-                        shortLinkDO.getOriginUrl(),
-                        LinkUtil.getLinkCacheValidaTime(shortLinkDO.getValidDate()),
-                        TimeUnit.MILLISECONDS);
-                response.sendRedirect(shortLinkDO.getOriginUrl());
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                response.sendRedirect("/page/notfound");
+                return;
             }
+            //将查到的短链接放入redis
+            stringRedisTemplate.opsForValue().set(
+                    String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
+                    shortLinkDO.getOriginUrl(),
+                    LinkUtil.getLinkCacheValidaTime(shortLinkDO.getValidDate()),
+                    TimeUnit.MILLISECONDS);
+            response.sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
             lock.unlock();
         }
