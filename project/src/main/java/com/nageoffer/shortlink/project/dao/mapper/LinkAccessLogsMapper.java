@@ -88,6 +88,36 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
     );
 
     /**
+     * 获取分组用户信息是否新老访客
+     * @return
+     */
+    @Select("<script> " +
+            "SELECT " +
+            "    user, " +
+            "    CASE " +
+            "        WHEN MIN(create_time) BETWEEN CONCAT(#{startDate},' 00:00:00') AND CONCAT(#{endDate},' 23:59:59') THEN '新访客' " +
+            "        ELSE '老访客' " +
+            "    END AS uvType " +
+            "FROM " +
+            "    t_link_access_logs " +
+            "WHERE " +
+            "    gid = #{gid} " +
+            "    AND user IN " +
+            "    <foreach item='item' index='index' collection='userAccessLogsList' open='(' separator=',' close=')'> " +
+            "        #{item} " +
+            "    </foreach> " +
+            "GROUP BY " +
+            "    user;" +
+            "    </script>"
+    )
+    List<Map<String, Object>> selectGroupUvTypeByUsers(
+            @Param("gid") String gid,
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            @Param("userAccessLogsList") List<String> userAccessLogsList
+    );
+
+    /**
      * 根据短链接获取指定日期内pv,uv,uip数据
      */
     @Select("SELECT " +
@@ -103,4 +133,5 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
             "GROUP BY " +
             "    full_short_url, gid, weekday;")
     LinkAccessStatsDO findPvUvUipStatsByShortLink(@Param("Param") ShortLinkStatsReqDTO request);
+
 }
