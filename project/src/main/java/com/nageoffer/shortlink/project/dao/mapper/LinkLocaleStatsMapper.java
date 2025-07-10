@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 地区访问持久层
  */
-public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsMapper> {
+public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDO> {
     /**
      * 记录地区访问监控数据
      */
