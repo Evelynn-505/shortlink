@@ -1,7 +1,6 @@
 server:
   port: 8002
 
-
 spring:
   spring:
     datasource:
@@ -47,3 +46,7 @@ spring:
               aes-key-value: d6oadClrrb9A3GWo
     props:
       sql-show: true
+
+short-link:
+  group:
+    max-num:20
